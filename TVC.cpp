@@ -18,6 +18,12 @@ Servo Thruster;
 ADXL345 ACC(ADXL345_STD);
 MPU6050 mpu(Wire);
 
+//Fuzzy Logic Control Variables Declaration
+/*
+--> 
+*/
+
+
 void setup()
 {
     Serial.begin(9600);
@@ -26,12 +32,38 @@ void setup()
     ServoXZ.attach(9);
     ServoYZ.attach(13);
   
-     //Setup the sensors (ADXL345)
+    //Setup the sensors (ADXL345)
     mpu.begin();
     mpu.calcGyroOffsets();
 }
 
 void loop()
 {
+    mpu.update();
 
+    if()
+    {
+        //Thrust Configruation and Stablisation
+    }else if()
+    {
+        //XY Stablisation
+    }else if()
+    {
+        //XZ Stablisation
+    }
+}
+
+void thrust_control ()
+{
+    //Thrust Control and Stabilisation
+}
+
+void XZ_Control()
+{
+    //XY Angle Stabilisation
+}
+
+void YZ_Control()
+{
+    //YZ Angular Stabilisation and Control
 }
