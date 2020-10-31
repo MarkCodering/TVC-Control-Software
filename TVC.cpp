@@ -14,13 +14,23 @@ Author: Mark Chen (陳皓圓) and 許哲維
 #include<ADXL345.h>
 #include<MPU6050_light.h>
 
-float setpoint_z = 0;
-float setpoint_angle_xz;
-float setpoint_angle_yz;
+float setpoint_z = {};
+float setpoint_angle_xz = {};
+float setpoint_angle_yz = {};
 
 float AccX, AccY, AccZ;
 float GyroX, GyroY, Gyroz;
 float AngX, AngY, AngZ;
+
+int Servo_XR_Command;
+int Servo_XL_Command;
+int Servo_YR_Command;
+int Servo_YL_Command;
+int Thrust_Command;
+
+int thrust_gain;
+int Servo_X_gain;
+int Servo_Y_gain;
 
 Servo Servo_XR;
 Servo Servo_XL;
@@ -35,11 +45,6 @@ MPU6050 mpu(Wire);
 /*
 --> 
 */
-
-//Flight Control Mapping
-int thrust_map = {};
-float AngX_map = {};
-float AngY_map = {};
 
 //Stage Machine Data Zone:
 //Stage 1: Lift-off -> 
@@ -87,7 +92,7 @@ void loop()
     if() //Stage 1 (Lift-off) (All motion stops and the GPS shows the vehicle is at launch site)
     {
         Serial.print("Lift-off Stage");
-        thrust_control(AccZ);
+        thrust_control(AccZ, setpoint_z);
         XZ_Control(AngX);
         YZ_Control(AngY);
     }else if() //(Stabilisation and Hovering)
@@ -105,10 +110,44 @@ void loop()
     }
 }
 
-void thrust_control (AccZ)
+void thrust_control (AccZ, setpoint_z)
 {
     //Thrust Control and Stabilisation
     AccZ = mpu.getAccZ;
+    Thrust_Command = (setpoint_z - AccZ)*thrust_gain;
+
+    //Fuzzy Control Mapping and Maps:
+    if (Thrust_Command > || Thrust_Command < )
+    {
+        Thruster.write();
+    }else if(Thrust_Command > || Thrust_Command < )
+    {
+        Thruster.write();
+    }else if(Thrust_Command > || Thrust_Command < )
+    {
+        Thruster.write();
+    }else if(Thrust_Command > || Thrust_Command < )
+    {
+        Thruster.write();
+    }else if(Thrust_Command > || Thrust_Command < )
+    {
+        Thruster.write();
+    }else if(Thrust_Command > || Thrust_Command < )
+    {
+        Thruster.write();
+    }else if(Thrust_Command > || Thrust_Command < )
+    {
+        Thruster.write();
+    }else if(Thrust_Command > || Thrust_Command < )
+    {
+        Thruster.write();
+    }else if(Thrust_Command > || Thrust_Command < )
+    {
+        Thruster.write();
+    }else if(Thrust_Command > || Thrust_Command < )
+    {
+        Thruster.write();
+    }
 }
 
 void XZ_Control()
