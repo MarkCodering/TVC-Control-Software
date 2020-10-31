@@ -18,6 +18,10 @@ float setpoint_z = 0;
 float setpoint_angle_xz;
 float setpoint_angle_yz;
 
+float AccX, AccY, AccZ;
+float GyroX, GyroY, Gyroz;
+float AngX, AngY, AngZ;
+
 Servo Servo_XR;
 Servo Servo_XL;
 Servo Servo_YR;
@@ -32,6 +36,11 @@ MPU6050 mpu(Wire);
 --> 
 */
 
+//Flight Control Mapping
+int thrust_map = {};
+float AngX_map = {};
+float AngY_map = {};
+
 //Stage Machine Data Zone:
 //Stage 1: Lift-off -> 
 //Stage 2: Stabilisation and Hovering -> 
@@ -41,16 +50,20 @@ MPU6050 mpu(Wire);
 
 void setup()
 {
+    //Communication Establishment:
     Serial.begin(9600);
     Wire.begin();
-  
-    ServoXZ.attach(9);
-    ServoYZ.attach(13);
-    Thruster.attach(7);
   
     //Setup the sensors (ADXL345)
     mpu.begin();
     mpu.calcGyroOffsets();
+
+    delay(1000);
+
+    //Servo Setup
+    ServoXZ.attach(9);
+    ServoYZ.attach(13);
+    Thruster.attach(7);
 
     //System Test:
     Thruster.write(300);
@@ -59,7 +72,6 @@ void setup()
     Servo_YR.write(0);
     Servo_YL.write(0);
 
-
     delay(10000); //Delay for ten seconds for final confirmation and countdown
 }
 
@@ -67,10 +79,17 @@ void loop()
 {
     mpu.update();
 
+    AccZ = mpu.getAccZ;
+    AngX = mpu.getAccAngleX;
+    AngY = mpu.getAccAngleY;
+
     //Stage Machine Scope
     if() //Stage 1 (Lift-off) (All motion stops and the GPS shows the vehicle is at launch site)
     {
-        //Thrust Configruation and Stablisation
+        Serial.print("Lift-off Stage");
+        thrust_control(AccZ);
+        XZ_Control(AngX);
+        YZ_Control(AngY);
     }else if() //(Stabilisation and Hovering)
     {
         //XY Stablisation
@@ -86,14 +105,15 @@ void loop()
     }
 }
 
-void thrust_control ()
+void thrust_control (AccZ)
 {
     //Thrust Control and Stabilisation
+    AccZ = mpu.getAccZ;
 }
 
 void XZ_Control()
 {
- 8   //XY Angle Stabilisation
+   //XY Angle Stabilisation
 }
 
 void YZ_Control()
