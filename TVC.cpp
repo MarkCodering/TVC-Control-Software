@@ -35,16 +35,11 @@ int Servo_Y_gain;
 Servo Servo_XR;
 Servo Servo_XL;
 Servo Servo_YR;
-Servo Servo_YL
+Servo Servo_YL;
 Servo Thruster;
 
 ADXL345 ACC(ADXL345_STD);
 MPU6050 mpu(Wire);
-
-//Fuzzy Logic Control Variables Declaration and Fuzzy Mapping Zone
-/*
---> 
-*/
 
 //Stage Machine Data Zone:
 //Stage 1: Lift-off -> 
@@ -66,8 +61,10 @@ void setup()
     delay(1000);
 
     //Servo Setup
-    ServoXZ.attach(9);
-    ServoYZ.attach(13);
+    Servo_XR.attach(6);
+    Servo_XL.attach(9);
+    Servo_YR.attach(11);
+    Servo_YL.attach(13);
     Thruster.attach(7);
 
     //System Test:
@@ -89,15 +86,17 @@ void loop()
     AngY = mpu.getAccAngleY;
 
     //Stage Machine Scope
-    if() //Stage 1 (Lift-off) (All motion stops and the GPS shows the vehicle is at launch site)
+    if(AccZ == 0 || AngX == 0 || AngY == 0) //Stage 1 (Lift-off) (All motion stops and the GPS shows the vehicle is at launch site)
     {
-        Serial.print("Lift-off Stage");
-        thrust_control(AccZ, setpoint_z);
+        Thrust_Control(AccZ, setpoint_z);
         XZ_Control(AngX);
         YZ_Control(AngY);
+        Serial.print("Lift-off Stage");
     }else if() //(Stabilisation and Hovering)
     {
         //XY Stablisation
+        Thrust_Control();
+        Serial.print("Stabilisation and Pre-hovering");
     }else if() //(Hovering)
     {
         //XZ Stablisation
@@ -109,12 +108,11 @@ void loop()
         //Landing and Touchshut
     }
 }
-
-void thrust_control (AccZ, setpoint_z)
+void Thrust_Control(AccZ, setpoint_z)
 {
     //Thrust Control and Stabilisation
     AccZ = mpu.getAccZ;
-    Thrust_Command = (setpoint_z - AccZ)*thrust_gain;
+    Thrust_Command = (setpoint_z - AccZ)*thrust_gain; //We need to define thrust_gain!!
 
     //Fuzzy Control Mapping and Maps:
     if (Thrust_Command > || Thrust_Command < )
