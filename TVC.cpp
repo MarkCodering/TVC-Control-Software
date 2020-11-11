@@ -157,3 +157,9 @@ void YZ_Control()
 {
     //YZ Angular Stabilisation and Control
 }
+
+/*
+測量:
+1. 重量
+2. 重心
+*/
