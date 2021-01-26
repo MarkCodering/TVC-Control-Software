@@ -14,9 +14,15 @@ Author: Mark Chen (陳皓圓) and 許哲維
 #include<ADXL345.h>
 #include<MPU6050_light.h>
 
-float setpoint_z = {};
-float setpoint_angle_xz = {};
-float setpoint_angle_yz = {};
+//Proportional Controller Gain Design
+const thrust_gain = 50;
+const servo_xz_gain = 50;
+const servo_yz_gain = 50;
+
+float setpoint_z;
+float setpoint_height;
+float setpoint_angle_xz;
+float setpoint_angle_yz;
 
 float AccX, AccY, AccZ;
 float GyroX, GyroY, Gyroz;
@@ -47,6 +53,10 @@ MPU6050 mpu(Wire);
 //Stage 3: Hozential Hovering 
 //Stage 4: Stabilisation and Landing Site Lockdown
 //Stage 5: Landing and Touchdown
+
+void Thruster_Control(float, float);
+void XZ_Control(float);
+void YZ_Control(float);
 
 void setup()
 {
@@ -81,71 +91,21 @@ void loop()
 {
     mpu.update();
 
-    AccZ = mpu.getAccZ;
-    AngX = mpu.getAccAngleX;
-    AngY = mpu.getAccAngleY;
+    AccZ = mpu.getAccZ();
+    AngX = mpu.getAccAngleX();
+    AngY = mpu.getAccAngleY();
 
     //Stage Machine Scope
-    if(AccZ == 0 || AngX == 0 || AngY == 0) //Stage 1 (Lift-off) (All motion stops and the GPS shows the vehicle is at launch site)
-    {
-        Thrust_Control(AccZ, setpoint_z);
-        XZ_Control(AngX);
-        YZ_Control(AngY);
-        Serial.print("Lift-off Stage");
-    }else if() //(Stabilisation and Hovering)
-    {
-        //XY Stablisation
-        Thrust_Control();
-        Serial.print("Stabilisation and Pre-hovering");
-    }else if() //(Hovering)
-    {
-        //XZ Stablisation
-    }else if() //(Stabilisation and Landing Site Lockdown)
-    {
-        //Landing
-    }else if() //(Landing and Touchdown)
-    {
-        //Landing and Touchshut
-    }
 }
+
+//Initial Design (OK)
+//Initial Verification ()
+//Final Verification ()
 void Thrust_Control(AccZ, setpoint_z)
 {
     //Thrust Control and Stabilisation
-    AccZ = mpu.getAccZ;
     Thrust_Command = (setpoint_z - AccZ)*thrust_gain; //We need to define thrust_gain!!
-
-    //Fuzzy Control Mapping and Maps:
-    if (Thrust_Command > || Thrust_Command < )
-    {
-        Thruster.write();
-    }else if(Thrust_Command > || Thrust_Command < )
-    {
-        Thruster.write();
-    }else if(Thrust_Command > || Thrust_Command < )
-    {
-        Thruster.write();
-    }else if(Thrust_Command > || Thrust_Command < )
-    {
-        Thruster.write();
-    }else if(Thrust_Command > || Thrust_Command < )
-    {
-        Thruster.write();
-    }else if(Thrust_Command > || Thrust_Command < )
-    {
-        Thruster.write();
-    }else if(Thrust_Command > || Thrust_Command < )
-    {
-        Thruster.write();
-    }else if(Thrust_Command > || Thrust_Command < )
-    {
-        Thruster.write();
-    }else if(Thrust_Command > || Thrust_Command < )
-    {
-        Thruster.write();
-    }else if(Thrust_Command > || Thrust_Command < )
-    {
-        Thruster.write();
-    }
+    Thruster.write(Thrust_Command);
 }
 
 void XZ_Control()
@@ -157,9 +117,3 @@ void YZ_Control()
 {
     //YZ Angular Stabilisation and Control
 }
-
-/*
-測量:
-1. 重量
-2. 重心
-*/
