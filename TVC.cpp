@@ -3,30 +3,28 @@ This is program aims to control the thrust vector control (TVC) vehicle
 using Arduino library and C programming Language
 Author: Mark Chen (陳皓圓) and 許哲維
 //Version: 0.1 (0 means that this is a initial script for the control system, testing and verification are required)
-//System Control Concept:
-//Stabilisation = (expectation - setpoint)*damper
-//Stabilisation <=> Fuzzy Control Value Map
+//System Control Concept: PID control with PID autotune libraray
 */
 
-#include<Arduino.h>
+//Library
+#include<PID_v1.h>
 #include<Wire.h>
 #include<Servo.h>
-#include<ADXL345.h>
-#include<MPU6050_light.h>
+#include<Adafruit_Sensor.h> 
+#include<Adafruit_ADXL345_U.h>
 
-//Proportional Controller Gain Design
-const thrust_gain = 50;
-const servo_xz_gain = 50;
-const servo_yz_gain = 50;
-
-float setpoint_z;
-float setpoint_height;
-float setpoint_angle_xz;
-float setpoint_angle_yz;
-
-float AccX, AccY, AccZ;
+//Declare global variables
+//Sensors - ADXL345
+float AccX, AccY, AccZ; //for launching
 float GyroX, GyroY, Gyroz;
-float AngX, AngY, AngZ;
+float AngX, AngY, AngZ; //For stabilisation
+
+//Height Sensor:
+float cur_height;
+
+//Control Variables
+float setpoint_height_ascend;
+int thrust;
 
 int Servo_XR_Command;
 int Servo_XL_Command;
@@ -34,9 +32,12 @@ int Servo_YR_Command;
 int Servo_YL_Command;
 int Thrust_Command;
 
-int thrust_gain;
-int Servo_X_gain;
-int Servo_Y_gain;
+//PID Controller
+PID thrust_control_ascend(&cur_height, &thrust, &setpoint_height_ascend, 1,1,1, DIRECT);
+PID stabilisation_ZX_1();
+PID stabilisation_ZX_2();
+PID stabilisation_ZY_1();
+PID stabilisation_ZY_2();
 
 Servo Servo_XR;
 Servo Servo_XL;
@@ -44,19 +45,11 @@ Servo Servo_YR;
 Servo Servo_YL;
 Servo Thruster;
 
-ADXL345 ACC(ADXL345_STD);
-MPU6050 mpu(Wire);
+Adafruit_ADXL345_Unified ADXL345 = Adafruit_ADXL345_Unified();
 
-//Stage Machine Data Zone:
-//Stage 1: Lift-off -> 
-//Stage 2: Stabilisation and Hovering -> 
-//Stage 3: Hozential Hovering 
-//Stage 4: Stabilisation and Landing Site Lockdown
-//Stage 5: Landing and Touchdown
-
-void Thruster_Control(float, float);
-void XZ_Control(float);
-void YZ_Control(float);
+void thrust_control_accend(float); //cur_height
+void thrust_control_descend(float); //cure_height
+void stabilisation(float, float, float); //AngX, AngY, AngZ
 
 void setup()
 {
@@ -65,9 +58,6 @@ void setup()
     Wire.begin();
   
     //Setup the sensors (ADXL345)
-    mpu.begin();
-    mpu.calcGyroOffsets();
-
     delay(1000);
 
     //Servo Setup
@@ -89,31 +79,17 @@ void setup()
 
 void loop()
 {
-    mpu.update();
+    sensors_event_t event; 
+    accel.getEvent(&event);
 
-    AccZ = mpu.getAccZ();
-    AngX = mpu.getAccAngleX();
-    AngY = mpu.getAccAngleY();
+    AccZ = event.acceleration.z();
+    AccX = event.acceleration.y();
+    AccY = event.acceleration.z();
 
-    //Stage Machine Scope
+    Thruster_Control(AccZ);
 }
 
-//Initial Design (OK)
-//Initial Verification ()
-//Final Verification ()
-void Thrust_Control(AccZ, setpoint_z)
+void thrust_control_accend(float input_height)
 {
-    //Thrust Control and Stabilisation
-    Thrust_Command = (setpoint_z - AccZ)*thrust_gain; //We need to define thrust_gain!!
-    Thruster.write(Thrust_Command);
-}
 
-void XZ_Control()
-{
-   //XY Angle Stabilisation
-}
-
-void YZ_Control()
-{
-    //YZ Angular Stabilisation and Control
 }
