@@ -53,8 +53,8 @@ Servo Servo_YL;
 Servo Thruster;
 
 //Sensor Declaration:
-float temperature, pressure, altitude;            // Create the temperature, pressure and altitude variables
-BMP280_DEV bmp280;  
+float temperature, pressure, altitude; // Create the temperature, pressure and altitude variables
+BMP280_DEV bmp280; //Declare sensor objects
   
 Adafruit_ADXL345_Unified ADXL345_sensor = Adafruit_ADXL345_Unified(12345);
 
@@ -97,7 +97,6 @@ void setup()
     stabilisation_ZY_1.SetMode(AUTOMATIC);
     stabilisation_ZY_2.SetMode(AUTOMATIC);
 
-
     delay(10000); //Delay for ten seconds for final confirmation and countdown
 }
 
@@ -112,7 +111,9 @@ void loop()
 
     bmp280.getMeasurements(temperature, pressure, altitude);
 
-    cur_height = altitude;
+    cur_height = altitude; //Variable Exchange, data type exchange
+
+    //State Machine Section
 
     thrust_control_ascend_PID.Compute();
     thrust_control_descend_PID.Compute();
@@ -127,19 +128,27 @@ void loop()
 void thrust_control_ascend(double input_height)
 {
     thrust_control_ascend_PID.Compute();
-    thrust = thrust*4.01;
+    thrust = thrust*4.01; //Scale Factor
+    /*
     Serial.print(cur_height);
     Serial.print("\n");
-    
     Serial.print(thrust);
     Serial.print("\n");
     delay(500);
+    */
     thrust = map(thrust, 0, 1023, 0, 180);
     Thruster.write(thrust);
 }
 
 void thrust_control_descent(double input_height)
 {
+    thrust_control_descend_PID.Compute();
+    thrust = thrust*4.01; //Scale Factor
     thrust = map(thrust, 0, 1023, 0, 180);
     Thruster.write(thrust);
+}
+
+void stabilisation(double, double, double)
+{
+    Serial.print("Stabilisation Inititated\n");
 }
