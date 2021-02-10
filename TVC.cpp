@@ -40,7 +40,7 @@ double Thrust_Command;
 
 //PID Controller
 PID thrust_control_ascend_PID(&cur_height, &thrust, &setpoint_height_ascend, 0.5,0.5,0.5, DIRECT);
-PID thrust_control_descend_PID(&cur_height, &thrust, &setpoint_height_descent, 1,1,1, DIRECT);
+PID thrust_control_descend_PID(&cur_height, &thrust, &setpoint_height_descent, 0.5,0.5,0.5, DIRECT);
 PID stabilisation_ZX_1(&AngX, &Servo_XR_Command, &setpoint_AngX, 1,1,1, DIRECT);
 PID stabilisation_ZX_2(&AngX, &Servo_XL_Command, &setpoint_AngX, 1,1,1, DIRECT);
 PID stabilisation_ZY_1(&AngY, &Servo_YR_Command, &setpoint_AngY, 1,1,1, DIRECT);
@@ -102,6 +102,7 @@ void setup()
 
 void loop()
 {
+    //Get sensing data
     sensors_event_t event; 
     ADXL345_sensor.getEvent(&event);
   
@@ -109,11 +110,33 @@ void loop()
     AccY = event.acceleration.y;
     AccX = event.acceleration.x;
 
+    AngX = event.angle.x;
+
     bmp280.getMeasurements(temperature, pressure, altitude);
 
     cur_height = altitude; //Variable Exchange, data type exchange
 
     //State Machine Section
+    if (altitude >= 0)
+    {
+        //Luanch Sequence
+        thrust_control_ascend(cur_height);
+        stabilisation(AngX, AngY, AngZ);
+    }else if (/*Condition is haven't launched and static*/)
+    {
+        //Luanching
+    }else if (/*Condition*/)
+    {
+        //Static Hovering
+    }else if (/*Condition*/)
+    {
+        //Landing
+    }else if (/*Condition*/)
+    {
+        //Touched Down and shutdown the engine
+    }else{
+        Serial.print("System Failed\n");
+    }
 
     thrust_control_ascend_PID.Compute();
     thrust_control_descend_PID.Compute();
@@ -129,13 +152,6 @@ void thrust_control_ascend(double input_height)
 {
     thrust_control_ascend_PID.Compute();
     thrust = thrust*4.01; //Scale Factor
-    /*
-    Serial.print(cur_height);
-    Serial.print("\n");
-    Serial.print(thrust);
-    Serial.print("\n");
-    delay(500);
-    */
     thrust = map(thrust, 0, 1023, 0, 180);
     Thruster.write(thrust);
 }
@@ -150,5 +166,13 @@ void thrust_control_descent(double input_height)
 
 void stabilisation(double, double, double)
 {
-    Serial.print("Stabilisation Inititated\n");
+    stabilisation_ZX_1.Compute();
+    stabilisation_ZX_2.Compute();
+    stabilisation_ZY_1.Compute();
+    stabilisation_ZY_2.compute();
+
+    Servo_XR.write(Servo_XR_Command);
+    Servo_XL.write(Servo_XL_Command);
+    Servo_YR.write(Servo_YR_Command);
+    Servo_YL.write(Servo_YL_Command);
 }
