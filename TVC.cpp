@@ -25,7 +25,7 @@ double cur_height;
 
 //Setpoints
 double setpoint_height_ascend = 38.0;
-double setpoint_height_descent = 100;
+double setpoint_height_descent = 0
 double setpoint_AngX = 0;
 double setpoint_AngY = 0;
 double setpoint_AngZ = 0;
@@ -61,6 +61,7 @@ Adafruit_ADXL345_Unified ADXL345_sensor = Adafruit_ADXL345_Unified(12345);
 void thrust_control_ascend(double); //cur_height
 void thrust_control_descend(double); //cure_height
 void stabilisation(double, double, double); //AngX, AngY, AngZ
+void engine_shutdown(void);
 
 void setup()
 {
@@ -110,30 +111,37 @@ void loop()
     AccY = event.acceleration.y;
     AccX = event.acceleration.x;
 
-    AngX = event.angle.x;
+    //AngX = event.angle.x;
 
     bmp280.getMeasurements(temperature, pressure, altitude);
 
     cur_height = altitude; //Variable Exchange, data type exchange
 
     //State Machine Section
-    if (altitude >= 0)
+    
+    if (altitude == 0)
     {
         //Luanch Sequence
+        stabilisation(AngX, AngY, AngZ);
+    }else if(altitude == 0 && AccX == 0 && AccY == 0 && AccZ == 0){
+        //Luanching
         thrust_control_ascend(cur_height);
         stabilisation(AngX, AngY, AngZ);
-    }else if (/*Condition is haven't launched and static*/)
-    {
-        //Luanching
     }else if (/*Condition*/)
     {
-        //Static Hovering
+        thrust_control_ascend(cur_height);
+        stabilisation(AngX, AngY, AngZ);
     }else if (/*Condition*/)
     {
         //Landing
+        thrust_control_descend(cur_height);
+        stabilisation(AngX, AngY, AngZ);
     }else if (/*Condition*/)
     {
         //Touched Down and shutdown the engine
+        thrust_control_ascend(cur_height);
+        stabilisation(AngX, AngY, AngZ);
+        engine_shutdown();
     }else{
         Serial.print("System Failed\n");
     }
@@ -169,10 +177,16 @@ void stabilisation(double, double, double)
     stabilisation_ZX_1.Compute();
     stabilisation_ZX_2.Compute();
     stabilisation_ZY_1.Compute();
-    stabilisation_ZY_2.compute();
+    stabilisation_ZY_2.Compute();
 
     Servo_XR.write(Servo_XR_Command);
     Servo_XL.write(Servo_XL_Command);
     Servo_YR.write(Servo_YR_Command);
     Servo_YL.write(Servo_YL_Command);
+}
+
+void engine_shutdown(void){
+    thrust = 0;
+    thrust = map(thrust, 0, 1023, 0, 180);
+    Thruster.write(thrust);
 }
